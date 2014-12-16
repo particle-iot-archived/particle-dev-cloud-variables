@@ -6,6 +6,7 @@ whenjs = require 'when'
 SettingsHelper = null
 Subscriber = null
 spark = null
+sparkDev = null
 
 module.exports =
 class CloudVariablesView extends View
@@ -13,14 +14,14 @@ class CloudVariablesView extends View
     @div id: 'spark-dev-cloud-variables-container', =>
       @div id: 'spark-dev-cloud-variables', outlet: 'variables'
 
-  initialize: (serializeState, sparkDev) ->
-    @sparkDev = sparkDev
+  initialize: (serializeState, mainModule) ->
+    sparkDev = mainModule
 
   setup: ->
     {$, $$} = require 'atom'
     {Subscriber} = require 'emissary'
 
-    SettingsHelper = @sparkDev.SettingsHelper
+    SettingsHelper = sparkDev.SettingsHelper
     spark = require 'spark'
     spark.login { accessToken: SettingsHelper.get('access_token') }
 
