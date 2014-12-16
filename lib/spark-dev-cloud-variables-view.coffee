@@ -71,7 +71,6 @@ class CloudVariablesView extends View
   # Propagate table with variables
   listVariables: ->
     variables = SettingsHelper.getLocal 'variables'
-    console.log 'vars', variables
     @variables.empty()
 
     if !variables || Object.keys(variables).length == 0
