@@ -1,0 +1,17 @@
+{
+  "name": "spark-dev-cloud-variables",
+  "main": "./lib/spark-dev-cloud-variables",
+  "version": "0.0.1",
+  "description": "Cloud variables panel",
+  "repository": "https://github.com/spark/spark-dev-cloud-variables",
+  "license": "MIT",
+  "engines": {
+    "atom": ">0.50.0"
+  },
+  "dependencies": {
+    "when": "*",
+    "emissary": "1.x",
+    "event-kit": "0.7.2",
+    "spark": "*"
+  }
+}
