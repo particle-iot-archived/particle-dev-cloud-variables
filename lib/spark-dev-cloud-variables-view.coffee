@@ -43,7 +43,6 @@ class CloudVariablesView extends View
       @clearWatchers()
       @close()
 
-    @client = null
     @watchers = {}
     @variablePromises = {}
 

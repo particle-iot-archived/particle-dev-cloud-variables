@@ -1,1 +1,1 @@
-# Cloud variable panel for Spark Dev
+# Cloud variables panel for Spark Dev
