@@ -31,7 +31,7 @@ module.exports =
 
 
   deactivate: ->
-    @sparkDevCloudVariablesView.destroy()
+    @sparkDevCloudVariablesView?.destroy()
 
   serialize: ->
-    sparkDevCloudVariablesViewState: @sparkDevCloudVariablesView.serialize()
+    sparkDevCloudVariablesViewState: @sparkDevCloudVariablesView?.serialize()

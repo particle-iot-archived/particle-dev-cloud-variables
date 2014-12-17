@@ -53,6 +53,10 @@ class CloudVariablesView extends View
 
   serialize: ->
 
+  destroy: ->
+    if @hasParent()
+      @remove()
+
   getTitle: ->
     'Cloud variables'
 
