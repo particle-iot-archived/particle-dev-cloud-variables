@@ -12,6 +12,7 @@
     "when": "*",
     "emissary": "1.x",
     "event-kit": "0.7.2",
-    "spark": "*"
+    "spark": "*",
+    "spark-dev-spec-stubs": "git://github.com/spark/spark-dev-spec-stubs.git#master"
   }
 }

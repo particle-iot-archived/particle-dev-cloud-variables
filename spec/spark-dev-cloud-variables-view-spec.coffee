@@ -1,28 +1,36 @@
 {WorkspaceView} = require 'atom'
 $ = require('atom').$
 SettingsHelper = null
-SparkStub = require '../stubs/spark'
+SparkStub = require('spark-dev-spec-stubs').spark
+spark = require 'spark'
 
-describe 'Cloud Variables and Functions View', ->
+describe 'Cloud Variables View', ->
   activationPromise = null
   originalProfile = null
   sparkDev = null
-  cloudVariablesAndFunctionsView = null
+  sparkDevCloudVariables = null
+  sparkDevCloudVariablesView = null
 
   beforeEach ->
     atom.workspaceView = new WorkspaceView
 
-    activationPromise = atom.packages.activatePackage('spark-dev').then ({mainModule}) ->
+    activationPromise = atom.packages.activatePackage('spark-dev-cloud-variables').then ({mainModule}) ->
+      sparkDevCloudVariables = mainModule
+
+    sparkDevPromise = atom.packages.activatePackage('spark-dev').then ({mainModule}) ->
       sparkDev = mainModule
       SettingsHelper = sparkDev.SettingsHelper
-      sparkDev.cloudVariablesAndFunctionsView = null
-
-    originalProfile = SettingsHelper.getProfile()
-    # For tests not to mess up our profile, we have to switch to test one...
-    SettingsHelper.setProfile 'spark-dev-test'
 
     waitsForPromise ->
       activationPromise
+
+    waitsForPromise ->
+      sparkDevPromise
+
+    runs ->
+      originalProfile = SettingsHelper.getProfile()
+      # For tests not to mess up our profile, we have to switch to test one...
+      SettingsHelper.setProfile 'spark-dev-test'
 
   afterEach ->
     SettingsHelper.setProfile originalProfile
@@ -32,46 +40,43 @@ describe 'Cloud Variables and Functions View', ->
       SettingsHelper.setCredentials 'foo@bar.baz', '0123456789abcdef0123456789abcdef'
       SettingsHelper.setCurrentCore '0123456789abcdef0123456789abcdef', 'Foo'
       SettingsHelper.setLocal 'variables', {foo: 'int32'}
-      SettingsHelper.setLocal 'functions', ['bar']
 
     afterEach ->
       SettingsHelper.clearCurrentCore()
       SettingsHelper.clearCredentials()
       SettingsHelper.setLocal 'variables', {}
-      SettingsHelper.setLocal 'functions', []
 
     it 'checks hiding and showing', ->
-      SparkStub.stubSuccess 'getVariable'
-      sparkDev.cloudVariablesAndFunctionsView = null
-      atom.workspaceView.trigger 'spark-dev:show-cloud-variables-and-functions'
+      SparkStub.stubSuccess spark, 'getVariable'
+      atom.workspaceView.trigger 'spark-dev-cloud-variables-view:show-cloud-variables'
 
       waitsFor ->
-        !!sparkDev.cloudVariablesAndFunctionsView && sparkDev.cloudVariablesAndFunctionsView.hasParent()
+        !!sparkDevCloudVariables.sparkDevCloudVariablesView && sparkDevCloudVariables.sparkDevCloudVariablesView.hasParent()
 
       runs ->
-        @cloudVariablesAndFunctionsView = sparkDev.cloudVariablesAndFunctionsView
+        @sparkDevCloudVariablesView = sparkDevCloudVariables.sparkDevCloudVariablesView
 
-        expect(atom.workspaceView.find('#spark-dev-cloud-variables-and-functions')).toExist()
-        @cloudVariablesAndFunctionsView.close()
-        expect(atom.workspaceView.find('#spark-dev-cloud-variables-and-functions')).not.toExist()
+        expect(atom.workspaceView.find('#spark-dev-cloud-variables')).toExist()
+        @sparkDevCloudVariablesView.close()
+        expect(atom.workspaceView.find('#spark-dev-cloud-variables')).not.toExist()
 
     it 'checks listing variables', ->
-      SparkStub.stubNoResolve 'getVariable'
-      atom.workspaceView.trigger 'spark-dev:show-cloud-variables-and-functions'
+      SparkStub.stubNoResolve spark, 'getVariable'
+      atom.workspaceView.trigger 'spark-dev-cloud-variables-view:show-cloud-variables'
 
       waitsFor ->
-        !!sparkDev.cloudVariablesAndFunctionsView
+        !!sparkDevCloudVariables.sparkDevCloudVariablesView
 
       runs ->
-        @cloudVariablesAndFunctionsView = sparkDev.cloudVariablesAndFunctionsView
-        spyOn @cloudVariablesAndFunctionsView, 'refreshVariable'
-        SparkStub.stubSuccess 'getVariable'
+        @sparkDevCloudVariablesView = sparkDevCloudVariables.sparkDevCloudVariablesView
+        spyOn @sparkDevCloudVariablesView, 'refreshVariable'
+        SparkStub.stubSuccess spark, 'getVariable'
 
       waitsFor ->
-        @cloudVariablesAndFunctionsView.hasParent()
+        @sparkDevCloudVariablesView.hasParent()
 
       runs ->
-        body = @cloudVariablesAndFunctionsView.find('#spark-dev-cloud-variables > .panel-body')
+        body = @sparkDevCloudVariablesView.find('#spark-dev-cloud-variables')
 
         expect(body.find('table')).toExist()
 
@@ -97,20 +102,20 @@ describe 'Cloud Variables and Functions View', ->
 
         # Test refresh button
         body.find('table > tbody > tr:eq(0) > td:eq(3) > button').click()
-        expect(@cloudVariablesAndFunctionsView.refreshVariable).toHaveBeenCalled()
-        expect(@cloudVariablesAndFunctionsView.refreshVariable).toHaveBeenCalledWith('foo')
-        jasmine.unspy @cloudVariablesAndFunctionsView, 'refreshVariable'
+        expect(@sparkDevCloudVariablesView.refreshVariable).toHaveBeenCalled()
+        expect(@sparkDevCloudVariablesView.refreshVariable).toHaveBeenCalledWith('foo')
+        jasmine.unspy @sparkDevCloudVariablesView, 'refreshVariable'
 
     it 'tests refreshing', ->
-      SparkStub.stubSuccess 'getVariable'
-      atom.workspaceView.trigger 'spark-dev:show-cloud-variables-and-functions'
+      SparkStub.stubSuccess spark, 'getVariable'
+      atom.workspaceView.trigger 'spark-dev-cloud-variables-view:show-cloud-variables'
 
       waitsFor ->
-        !!sparkDev.cloudVariablesAndFunctionsView && sparkDev.cloudVariablesAndFunctionsView.hasParent()
+        !!sparkDevCloudVariables.sparkDevCloudVariablesView && sparkDevCloudVariables.sparkDevCloudVariablesView.hasParent()
 
       runs ->
-        @cloudVariablesAndFunctionsView = sparkDev.cloudVariablesAndFunctionsView
-        @body = @cloudVariablesAndFunctionsView.find('#spark-dev-cloud-variables > .panel-body')
+        @sparkDevCloudVariablesView = sparkDevCloudVariables.sparkDevCloudVariablesView
+        @body = @sparkDevCloudVariablesView.find('#spark-dev-cloud-variables')
 
       waitsFor ->
         @body.find('table > tbody > tr:eq(0) > td:eq(2)').text() == '1'
@@ -119,73 +124,70 @@ describe 'Cloud Variables and Functions View', ->
         expect(@body.find('table > tbody > tr:eq(0) > td:eq(2)').hasClass('loading')).toBe(false)
 
     it 'checks event hooks', ->
-      SparkStub.stubSuccess 'getVariable'
-      atom.workspaceView.trigger 'spark-dev:show-cloud-variables-and-functions'
+      SparkStub.stubSuccess spark, 'getVariable'
+      atom.workspaceView.trigger 'spark-dev-cloud-variables-view:show-cloud-variables'
 
       waitsFor ->
-        !!sparkDev.cloudVariablesAndFunctionsView && sparkDev.cloudVariablesAndFunctionsView.hasParent()
+        !!sparkDevCloudVariables.sparkDevCloudVariablesView && sparkDevCloudVariables.sparkDevCloudVariablesView.hasParent()
 
       runs ->
-        @cloudVariablesAndFunctionsView = sparkDev.cloudVariablesAndFunctionsView
+        @sparkDevCloudVariablesView = sparkDevCloudVariables.sparkDevCloudVariablesView
 
         # Tests spark-dev:update-core-status
-        spyOn @cloudVariablesAndFunctionsView, 'listVariables'
-        spyOn @cloudVariablesAndFunctionsView, 'listFunctions'
-        spyOn @cloudVariablesAndFunctionsView, 'clearWatchers'
+        spyOn @sparkDevCloudVariablesView, 'listVariables'
+        spyOn @sparkDevCloudVariablesView, 'clearWatchers'
         atom.workspaceView.trigger 'spark-dev:core-status-updated'
-        expect(@cloudVariablesAndFunctionsView.listVariables).toHaveBeenCalled()
-        expect(@cloudVariablesAndFunctionsView.listFunctions).toHaveBeenCalled()
-        expect(@cloudVariablesAndFunctionsView.clearWatchers).toHaveBeenCalled()
-        jasmine.unspy @cloudVariablesAndFunctionsView, 'listVariables'
-        jasmine.unspy @cloudVariablesAndFunctionsView, 'listFunctions'
-        jasmine.unspy @cloudVariablesAndFunctionsView, 'clearWatchers'
+        expect(@sparkDevCloudVariablesView.listVariables).toHaveBeenCalled()
+        expect(@sparkDevCloudVariablesView.clearWatchers).toHaveBeenCalled()
+        jasmine.unspy @sparkDevCloudVariablesView, 'listVariables'
+        jasmine.unspy @sparkDevCloudVariablesView, 'clearWatchers'
 
         # Tests spark-dev:logout
         SettingsHelper.clearCredentials()
-        spyOn @cloudVariablesAndFunctionsView, 'close'
-        spyOn @cloudVariablesAndFunctionsView, 'clearWatchers'
+        spyOn @sparkDevCloudVariablesView, 'close'
+        spyOn @sparkDevCloudVariablesView, 'clearWatchers'
         atom.workspaceView.trigger 'spark-dev:logout'
-        expect(@cloudVariablesAndFunctionsView.close).toHaveBeenCalled()
-        expect(@cloudVariablesAndFunctionsView.clearWatchers).toHaveBeenCalled()
-        jasmine.unspy @cloudVariablesAndFunctionsView, 'close'
-        jasmine.unspy @cloudVariablesAndFunctionsView, 'clearWatchers'
-        @cloudVariablesAndFunctionsView.detach()
+        expect(@sparkDevCloudVariablesView.close).toHaveBeenCalled()
+        expect(@sparkDevCloudVariablesView.clearWatchers).toHaveBeenCalled()
+        jasmine.unspy @sparkDevCloudVariablesView, 'close'
+        jasmine.unspy @sparkDevCloudVariablesView, 'clearWatchers'
+        @sparkDevCloudVariablesView.detach()
 
     it 'check watching variable', ->
-      SparkStub.stubSuccess 'getVariable'
-      atom.workspaceView.trigger 'spark-dev:show-cloud-variables-and-functions'
+      SparkStub.stubSuccess spark, 'getVariable'
+      atom.workspaceView.trigger 'spark-dev-cloud-variables-view:show-cloud-variables'
 
       waitsFor ->
-        !!sparkDev.cloudVariablesAndFunctionsView && sparkDev.cloudVariablesAndFunctionsView.hasParent()
+        !!sparkDevCloudVariables.sparkDevCloudVariablesView && sparkDevCloudVariables.sparkDevCloudVariablesView.hasParent()
 
       runs ->
-        @cloudVariablesAndFunctionsView = sparkDev.cloudVariablesAndFunctionsView
+        @sparkDevCloudVariablesView = sparkDevCloudVariables.sparkDevCloudVariablesView
 
-        row = @cloudVariablesAndFunctionsView.find('#spark-dev-cloud-variables > .panel-body table > tbody > tr:eq(0)')
+        row = @sparkDevCloudVariablesView.find('#spark-dev-cloud-variables table > tbody > tr:eq(0)')
 
         watchButton = row.find('td:eq(4) > button')
         refreshButton = row.find('td:eq(3) > button')
 
         expect(refreshButton.attr('disabled')).not.toEqual('disabled')
         expect(watchButton.hasClass('selected')).toBe(false)
-        expect(Object.keys(@cloudVariablesAndFunctionsView.watchers).length).toEqual(0)
+        expect(Object.keys(@sparkDevCloudVariablesView.watchers).length).toEqual(0)
 
         jasmine.Clock.useMock()
-        spyOn @cloudVariablesAndFunctionsView, 'refreshVariable'
+        spyOn @sparkDevCloudVariablesView, 'refreshVariable'
 
         watchButton.click()
 
         expect(refreshButton.attr('disabled')).toEqual('disabled')
         expect(watchButton.hasClass('selected')).toBe(true)
-        expect(Object.keys(@cloudVariablesAndFunctionsView.watchers).length).toEqual(1)
-        expect(Object.keys(@cloudVariablesAndFunctionsView.watchers)).toEqual(['foo'])
-        expect(@cloudVariablesAndFunctionsView.refreshVariable).not.toHaveBeenCalled()
-        watcher = @cloudVariablesAndFunctionsView.watchers['foo']
+        expect(Object.keys(@sparkDevCloudVariablesView.watchers).length).toEqual(1)
+        expect(Object.keys(@sparkDevCloudVariablesView.watchers)).toEqual(['foo'])
+        expect(@sparkDevCloudVariablesView.refreshVariable).not.toHaveBeenCalled()
+        watcher = @sparkDevCloudVariablesView.watchers['foo']
 
         jasmine.Clock.tick(5001)
 
-        expect(@cloudVariablesAndFunctionsView.refreshVariable).toHaveBeenCalled()
-        expect(@cloudVariablesAndFunctionsView.refreshVariable).toHaveBeenCalledWith('foo')
+        expect(@sparkDevCloudVariablesView.refreshVariable).toHaveBeenCalled()
+        expect(@sparkDevCloudVariablesView.refreshVariable).toHaveBeenCalledWith('foo')
 
         spyOn window, 'clearInterval'
 
@@ -195,37 +197,35 @@ describe 'Cloud Variables and Functions View', ->
 
         expect(refreshButton.attr('disabled')).not.toEqual('disabled')
         expect(watchButton.hasClass('selected')).toBe(false)
-        expect(Object.keys(@cloudVariablesAndFunctionsView.watchers).length).toEqual(0)
+        expect(Object.keys(@sparkDevCloudVariablesView.watchers).length).toEqual(0)
         expect(window.clearInterval).toHaveBeenCalled()
         expect(window.clearInterval).toHaveBeenCalledWith(watcher)
 
         # TODO: Test clearing all watchers
 
         jasmine.unspy window, 'clearInterval'
-        jasmine.unspy @cloudVariablesAndFunctionsView, 'refreshVariable'
-        @cloudVariablesAndFunctionsView.detach()
+        jasmine.unspy @sparkDevCloudVariablesView, 'refreshVariable'
+        @sparkDevCloudVariablesView.detach()
 
     it 'checks clearing watchers', ->
-      SparkStub.stubSuccess 'getVariable'
-      atom.workspaceView.trigger 'spark-dev:show-cloud-variables-and-functions'
+      SparkStub.stubSuccess spark, 'getVariable'
+      atom.workspaceView.trigger 'spark-dev-cloud-variables-view:show-cloud-variables'
 
       waitsFor ->
-        !!sparkDev.cloudVariablesAndFunctionsView && sparkDev.cloudVariablesAndFunctionsView.hasParent()
+        !!sparkDevCloudVariables.sparkDevCloudVariablesView && sparkDevCloudVariables.sparkDevCloudVariablesView.hasParent()
 
       runs ->
-        @cloudVariablesAndFunctionsView = sparkDev.cloudVariablesAndFunctionsView
-        @cloudVariablesAndFunctionsView.watchers['foo'] = 'bar'
+        @sparkDevCloudVariablesView = sparkDevCloudVariables.sparkDevCloudVariablesView
+        @sparkDevCloudVariablesView.watchers['foo'] = 'bar'
         spyOn window, 'clearInterval'
         expect(window.clearInterval).not.toHaveBeenCalled()
 
-        expect(Object.keys(@cloudVariablesAndFunctionsView.watchers).length).toEqual(1)
-        @cloudVariablesAndFunctionsView.clearWatchers()
+        expect(Object.keys(@sparkDevCloudVariablesView.watchers).length).toEqual(1)
+        @sparkDevCloudVariablesView.clearWatchers()
 
         expect(window.clearInterval).toHaveBeenCalled()
         expect(window.clearInterval).toHaveBeenCalledWith('bar')
-        expect(Object.keys(@cloudVariablesAndFunctionsView.watchers).length).toEqual(0)
+        expect(Object.keys(@sparkDevCloudVariablesView.watchers).length).toEqual(0)
 
         jasmine.unspy window, 'clearInterval'
-        @cloudVariablesAndFunctionsView.detach()
-
-    # TODO: Test functions
+        @sparkDevCloudVariablesView.detach()
