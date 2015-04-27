@@ -1,5 +1,5 @@
-{View, TextEditorView} = require 'atom'
-{Emitter} = require 'event-kit'
+{Disposable, CompositeDisposable} = require 'atom'
+{View} = require 'atom-space-pen-views'
 $ = null
 $$ = null
 whenjs = require 'when'
@@ -12,36 +12,36 @@ module.exports =
 class CloudVariablesView extends View
   @content: ->
     @div id: 'spark-dev-cloud-variables-container', =>
-      @div id: 'spark-dev-cloud-variables', outlet: 'variables'
+      @div id: 'spark-dev-cloud-variables', outlet: 'variablesList'
 
   initialize: (serializeState, mainModule) ->
     sparkDev = mainModule
 
   setup: ->
-    {$, $$} = require 'atom'
-    {Subscriber} = require 'emissary'
+    {$, $$} = require 'atom-space-pen-views'
 
     SettingsHelper = sparkDev.SettingsHelper
     spark = require 'spark'
     spark.login { accessToken: SettingsHelper.get('access_token') }
 
-    @emitter = new Emitter
-    @subscriber = new Subscriber()
-    # Show some progress when core's status is downloaded
-    @subscriber.subscribeToCommand atom.workspaceView, 'spark-dev:update-core-status', =>
-      @variables.empty()
-      @addClass 'loading'
 
-    @subscriber.subscribeToCommand atom.workspaceView, 'spark-dev:core-status-updated', =>
-      # Refresh UI and watchers when current core changes
-      @listVariables()
-      @clearWatchers()
-      @removeClass 'loading'
 
-    @subscriber.subscribeToCommand atom.workspaceView, 'spark-dev:logout', =>
-      # Clear watchers and hide when user logs out
-      @clearWatchers()
-      @close()
+    @disposables = new CompositeDisposable
+
+    @disposables.add atom.commands.add 'atom-workspace',
+      'spark-dev:update-core-status': =>
+        # Show some progress when core's status is downloaded
+        @variablesList.empty()
+        @addClass 'loading'
+      'spark-dev:core-status-updated': =>
+        # Refresh UI and watchers when current core changes
+        @listVariables()
+        @clearWatchers()
+        @removeClass 'loading'
+      'spark-dev:logout': =>
+        # Clear watchers and hide when user logs out
+        @clearWatchers()
+        @close()
 
     @watchers = {}
     @variablePromises = {}
@@ -55,18 +55,20 @@ class CloudVariablesView extends View
   destroy: ->
     if @hasParent()
       @remove()
+    @disposables?.dispose()
 
   getTitle: ->
     'Cloud variables'
 
-  onDidChangeTitle: (callback) ->
-    @emitter.on 'did-change-title', callback
+  # TODO: Remove both of these post 1.0
+  onDidChangeTitle: (callback) -> new Disposable()
+  onDidChangeModified: (callback) -> new Disposable()
 
-  onDidChangeModified: (callback) ->
-    @emitter.on 'did-change-modified', callback
+  getPath: ->
+    'cloud-variables'
 
   getUri: ->
-    'spark-dev://editor/cloud-variables'
+    'spark-dev://editor/' + @getPath()
 
   close: ->
     pane = atom.workspace.paneForUri @getUri()
@@ -75,10 +77,10 @@ class CloudVariablesView extends View
   # Propagate table with variables
   listVariables: ->
     variables = SettingsHelper.getLocal 'variables'
-    @variables.empty()
+    @variablesList.empty()
 
     if !variables || Object.keys(variables).length == 0
-      @variables.append $$ ->
+      @variablesList.append $$ ->
         @ul class: 'background-message', =>
           @li 'No variables registered'
     else
@@ -114,7 +116,7 @@ class CloudVariablesView extends View
 
         table.find('tbody').append row.find('tbody >')
 
-      @variables.append table
+      @variablesList.append table
 
       # Get initial values
       for variable in Object.keys(variables)
