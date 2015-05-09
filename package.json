@@ -1,7 +1,7 @@
 {
   "name": "spark-dev-cloud-variables",
   "main": "./lib/spark-dev-cloud-variables",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Cloud variables panel for Spark Dev",
   "repository": "https://github.com/spark/spark-dev-cloud-variables",
   "license": "MIT",
