@@ -1,15 +1,15 @@
 {
-  "name": "spark-dev-cloud-variables",
+  "name": "particle-dev-cloud-variables",
   "main": "./lib/spark-dev-cloud-variables",
-  "version": "0.0.3",
-  "description": "Cloud variables panel for Spark Dev",
-  "repository": "https://github.com/spark/spark-dev-cloud-variables",
+  "version": "0.0.4",
+  "description": "Cloud variables panel for Particle Dev",
+  "repository": "https://github.com/spark/particle-dev-cloud-variables",
   "license": "MIT",
   "engines": {
     "atom": ">0.50.0"
   },
   "dependencies": {
-    "atom-space-pen-views": "^2.0.3",
+    "atom-space-pen-views": "^2.0.5",
     "when": "*",
     "spark": "^0.5.9",
     "spark-dev-spec-stubs": "git://github.com/spark/spark-dev-spec-stubs.git#master",
