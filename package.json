@@ -1,7 +1,7 @@
 {
   "name": "particle-dev-cloud-variables",
   "main": "./lib/spark-dev-cloud-variables",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Cloud variables panel for Particle Dev",
   "repository": "https://github.com/spark/particle-dev-cloud-variables",
   "license": "MIT",
@@ -9,7 +9,7 @@
     "atom": ">0.50.0"
   },
   "dependencies": {
-    "atom-space-pen-views": "^2.0.5",
+    "atom-space-pen-views": "^2.1.0",
     "when": "*",
     "spark": "^0.5.9",
     "spark-dev-spec-stubs": "git://github.com/spark/spark-dev-spec-stubs.git#master",
