@@ -1,5 +1,5 @@
 {$} = require 'atom-space-pen-views'
-SparkStub = require('spark-dev-spec-stubs').spark
+SparkStub = require('particle-dev-spec-stubs').spark
 SparkDevCloudVariablesView = require '../lib/spark-dev-cloud-variables-view'
 spark = require 'spark'
 SettingsHelper = null
