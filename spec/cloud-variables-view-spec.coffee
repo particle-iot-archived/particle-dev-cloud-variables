@@ -1,37 +1,37 @@
 {$} = require 'atom-space-pen-views'
 SparkStub = require('particle-dev-spec-stubs').spark
-SparkDevCloudVariablesView = require '../lib/spark-dev-cloud-variables-view'
+CloudVariablesView = require '../lib/cloud-variables-view'
 spark = require 'spark'
 SettingsHelper = null
 
 describe 'Cloud Variables View', ->
   activationPromise = null
   originalProfile = null
-  sparkDev = null
-  sparkDevCloudVariables = null
-  sparkDevCloudVariablesView = null
+  particleDev = null
+  cloudVariables = null
+  cloudVariablesView = null
   workspaceElement = null
 
   beforeEach ->
     workspaceElement = atom.views.getView(atom.workspace)
 
-    activationPromise = atom.packages.activatePackage('spark-dev-cloud-variables').then ({mainModule}) ->
-      sparkDevCloudVariables = mainModule
+    activationPromise = atom.packages.activatePackage('particle-dev-cloud-variables').then ({mainModule}) ->
+      cloudVariables = mainModule
 
-    sparkDevPromise = atom.packages.activatePackage('spark-dev').then ({mainModule}) ->
-      sparkDev = mainModule
-      SettingsHelper = sparkDev.SettingsHelper
+    particleDevPromise = atom.packages.activatePackage('particle-dev').then ({mainModule}) ->
+      particleDev = mainModule
+      SettingsHelper = particleDev.SettingsHelper
 
     waitsForPromise ->
       activationPromise
 
     waitsForPromise ->
-      sparkDevPromise
+      particleDevPromise
 
     runs ->
       originalProfile = SettingsHelper.getProfile()
       # For tests not to mess up our profile, we have to switch to test one...
-      SettingsHelper.setProfile 'spark-dev-test'
+      SettingsHelper.setProfile 'particle-dev-test'
 
   afterEach ->
     SettingsHelper.setProfile originalProfile
@@ -50,12 +50,12 @@ describe 'Cloud Variables View', ->
     it 'checks listing variables', ->
       SparkStub.stubNoResolve spark, 'getVariable'
 
-      sparkDevCloudVariablesView = new SparkDevCloudVariablesView(null, sparkDev)
-      sparkDevCloudVariablesView.setup()
-      spyOn sparkDevCloudVariablesView, 'refreshVariable'
+      cloudVariablesView = new CloudVariablesView(null, particleDev)
+      cloudVariablesView.setup()
+      spyOn cloudVariablesView, 'refreshVariable'
       SparkStub.stubSuccess spark, 'getVariable'
 
-      body = sparkDevCloudVariablesView.find('#spark-dev-cloud-variables')
+      body = cloudVariablesView.find('#particle-dev-cloud-variables')
 
       expect(body.find('table')).toExist()
 
@@ -81,15 +81,15 @@ describe 'Cloud Variables View', ->
 
       # Test refresh button
       body.find('table > tbody > tr:eq(0) > td:eq(3) > button').click()
-      expect(sparkDevCloudVariablesView.refreshVariable).toHaveBeenCalled()
-      expect(sparkDevCloudVariablesView.refreshVariable).toHaveBeenCalledWith('foo')
-      jasmine.unspy sparkDevCloudVariablesView, 'refreshVariable'
+      expect(cloudVariablesView.refreshVariable).toHaveBeenCalled()
+      expect(cloudVariablesView.refreshVariable).toHaveBeenCalledWith('foo')
+      jasmine.unspy cloudVariablesView, 'refreshVariable'
 
     it 'tests refreshing', ->
       SparkStub.stubSuccess spark, 'getVariable'
-      sparkDevCloudVariablesView = new SparkDevCloudVariablesView(null, sparkDev)
-      sparkDevCloudVariablesView.setup()
-      body = sparkDevCloudVariablesView.find('#spark-dev-cloud-variables')
+      cloudVariablesView = new CloudVariablesView(null, particleDev)
+      cloudVariablesView.setup()
+      body = cloudVariablesView.find('#particle-dev-cloud-variables')
 
       waitsFor ->
         body.find('table > tbody > tr:eq(0) > td:eq(2)').text() == '1'
@@ -99,58 +99,58 @@ describe 'Cloud Variables View', ->
 
     it 'checks event hooks', ->
       SparkStub.stubSuccess spark, 'getVariable'
-      sparkDevCloudVariablesView = new SparkDevCloudVariablesView(null, sparkDev)
-      sparkDevCloudVariablesView.setup()
+      cloudVariablesView = new CloudVariablesView(null, particleDev)
+      cloudVariablesView.setup()
 
-      # Tests spark-dev:update-core-status
-      spyOn sparkDevCloudVariablesView, 'listVariables'
-      spyOn sparkDevCloudVariablesView, 'clearWatchers'
-      atom.commands.dispatch workspaceElement, 'spark-dev:core-status-updated'
-      expect(sparkDevCloudVariablesView.listVariables).toHaveBeenCalled()
-      expect(sparkDevCloudVariablesView.clearWatchers).toHaveBeenCalled()
-      jasmine.unspy sparkDevCloudVariablesView, 'listVariables'
-      jasmine.unspy sparkDevCloudVariablesView, 'clearWatchers'
+      # Tests particle-dev:update-core-status
+      spyOn cloudVariablesView, 'listVariables'
+      spyOn cloudVariablesView, 'clearWatchers'
+      atom.commands.dispatch workspaceElement, 'particle-dev:core-status-updated'
+      expect(cloudVariablesView.listVariables).toHaveBeenCalled()
+      expect(cloudVariablesView.clearWatchers).toHaveBeenCalled()
+      jasmine.unspy cloudVariablesView, 'listVariables'
+      jasmine.unspy cloudVariablesView, 'clearWatchers'
 
-      # Tests spark-dev:logout
+      # Tests particle-dev:logout
       SettingsHelper.clearCredentials()
-      spyOn sparkDevCloudVariablesView, 'close'
-      spyOn sparkDevCloudVariablesView, 'clearWatchers'
-      atom.commands.dispatch workspaceElement, 'spark-dev:logout'
-      expect(sparkDevCloudVariablesView.close).toHaveBeenCalled()
-      expect(sparkDevCloudVariablesView.clearWatchers).toHaveBeenCalled()
-      jasmine.unspy sparkDevCloudVariablesView, 'close'
-      jasmine.unspy sparkDevCloudVariablesView, 'clearWatchers'
+      spyOn cloudVariablesView, 'close'
+      spyOn cloudVariablesView, 'clearWatchers'
+      atom.commands.dispatch workspaceElement, 'particle-dev:logout'
+      expect(cloudVariablesView.close).toHaveBeenCalled()
+      expect(cloudVariablesView.clearWatchers).toHaveBeenCalled()
+      jasmine.unspy cloudVariablesView, 'close'
+      jasmine.unspy cloudVariablesView, 'clearWatchers'
 
     it 'check watching variable', ->
       SparkStub.stubSuccess spark, 'getVariable'
-      sparkDevCloudVariablesView = new SparkDevCloudVariablesView(null, sparkDev)
-      sparkDevCloudVariablesView.setup()
+      cloudVariablesView = new CloudVariablesView(null, particleDev)
+      cloudVariablesView.setup()
 
-      row = sparkDevCloudVariablesView.find('#spark-dev-cloud-variables table > tbody > tr:eq(0)')
+      row = cloudVariablesView.find('#particle-dev-cloud-variables table > tbody > tr:eq(0)')
 
       watchButton = row.find('td:eq(4) > button')
       refreshButton = row.find('td:eq(3) > button')
 
       expect(refreshButton.attr('disabled')).not.toEqual('disabled')
       expect(watchButton.hasClass('selected')).toBe(false)
-      expect(Object.keys(sparkDevCloudVariablesView.watchers).length).toEqual(0)
+      expect(Object.keys(cloudVariablesView.watchers).length).toEqual(0)
 
       jasmine.Clock.useMock()
-      spyOn sparkDevCloudVariablesView, 'refreshVariable'
+      spyOn cloudVariablesView, 'refreshVariable'
 
       watchButton.click()
 
       expect(refreshButton.attr('disabled')).toEqual('disabled')
       expect(watchButton.hasClass('selected')).toBe(true)
-      expect(Object.keys(sparkDevCloudVariablesView.watchers).length).toEqual(1)
-      expect(Object.keys(sparkDevCloudVariablesView.watchers)).toEqual(['foo'])
-      expect(sparkDevCloudVariablesView.refreshVariable).not.toHaveBeenCalled()
-      watcher = sparkDevCloudVariablesView.watchers['foo']
+      expect(Object.keys(cloudVariablesView.watchers).length).toEqual(1)
+      expect(Object.keys(cloudVariablesView.watchers)).toEqual(['foo'])
+      expect(cloudVariablesView.refreshVariable).not.toHaveBeenCalled()
+      watcher = cloudVariablesView.watchers['foo']
 
       jasmine.Clock.tick(5001)
 
-      expect(sparkDevCloudVariablesView.refreshVariable).toHaveBeenCalled()
-      expect(sparkDevCloudVariablesView.refreshVariable).toHaveBeenCalledWith('foo')
+      expect(cloudVariablesView.refreshVariable).toHaveBeenCalled()
+      expect(cloudVariablesView.refreshVariable).toHaveBeenCalledWith('foo')
 
       spyOn window, 'clearInterval'
 
@@ -160,28 +160,28 @@ describe 'Cloud Variables View', ->
 
       expect(refreshButton.attr('disabled')).not.toEqual('disabled')
       expect(watchButton.hasClass('selected')).toBe(false)
-      expect(Object.keys(sparkDevCloudVariablesView.watchers).length).toEqual(0)
+      expect(Object.keys(cloudVariablesView.watchers).length).toEqual(0)
       expect(window.clearInterval).toHaveBeenCalled()
       expect(window.clearInterval).toHaveBeenCalledWith(watcher)
 
       # TODO: Test clearing all watchers
 
       jasmine.unspy window, 'clearInterval'
-      jasmine.unspy sparkDevCloudVariablesView, 'refreshVariable'
+      jasmine.unspy cloudVariablesView, 'refreshVariable'
 
     it 'checks clearing watchers', ->
-      sparkDevCloudVariablesView = new SparkDevCloudVariablesView(null, sparkDev)
-      sparkDevCloudVariablesView.setup()
+      cloudVariablesView = new CloudVariablesView(null, particleDev)
+      cloudVariablesView.setup()
 
-      sparkDevCloudVariablesView.watchers['foo'] = 'bar'
+      cloudVariablesView.watchers['foo'] = 'bar'
       spyOn window, 'clearInterval'
       expect(window.clearInterval).not.toHaveBeenCalled()
 
-      expect(Object.keys(sparkDevCloudVariablesView.watchers).length).toEqual(1)
-      sparkDevCloudVariablesView.clearWatchers()
+      expect(Object.keys(cloudVariablesView.watchers).length).toEqual(1)
+      cloudVariablesView.clearWatchers()
 
       expect(window.clearInterval).toHaveBeenCalled()
       expect(window.clearInterval).toHaveBeenCalledWith('bar')
-      expect(Object.keys(sparkDevCloudVariablesView.watchers).length).toEqual(0)
+      expect(Object.keys(cloudVariablesView.watchers).length).toEqual(0)
 
       jasmine.unspy window, 'clearInterval'

@@ -6,21 +6,21 @@ whenjs = require 'when'
 SettingsHelper = null
 Subscriber = null
 spark = null
-sparkDev = null
+particleDev = null
 
 module.exports =
 class CloudVariablesView extends View
   @content: ->
-    @div id: 'spark-dev-cloud-variables-container', =>
-      @div id: 'spark-dev-cloud-variables', outlet: 'variablesList'
+    @div id: 'particle-dev-cloud-variables-container', =>
+      @div id: 'particle-dev-cloud-variables', outlet: 'variablesList'
 
   initialize: (serializeState, mainModule) ->
-    sparkDev = mainModule
+    particleDev = mainModule
 
   setup: ->
     {$, $$} = require 'atom-space-pen-views'
 
-    SettingsHelper = sparkDev.SettingsHelper
+    SettingsHelper = particleDev.SettingsHelper
     spark = require 'spark'
     spark.login { accessToken: SettingsHelper.get('access_token') }
 
@@ -29,16 +29,16 @@ class CloudVariablesView extends View
     @disposables = new CompositeDisposable
 
     @disposables.add atom.commands.add 'atom-workspace',
-      'spark-dev:update-core-status': =>
+      'particle-dev:update-core-status': =>
         # Show some progress when core's status is downloaded
         @variablesList.empty()
         @addClass 'loading'
-      'spark-dev:core-status-updated': =>
+      'particle-dev:core-status-updated': =>
         # Refresh UI and watchers when current core changes
         @listVariables()
         @clearWatchers()
         @removeClass 'loading'
-      'spark-dev:logout': =>
+      'particle-dev:logout': =>
         # Clear watchers and hide when user logs out
         @clearWatchers()
         @close()
@@ -68,7 +68,7 @@ class CloudVariablesView extends View
     'cloud-variables'
 
   getUri: ->
-    'spark-dev://editor/' + @getPath()
+    'particle-dev://editor/' + @getPath()
 
   close: ->
     pane = atom.workspace.paneForUri @getUri()
@@ -126,7 +126,7 @@ class CloudVariablesView extends View
   refreshVariable: (variableName) ->
     dfd = whenjs.defer()
 
-    cell = @find('#spark-dev-cloud-variables [data-id=' + variableName + '] td:eq(2)')
+    cell = @find('#particle-dev-cloud-variables [data-id=' + variableName + '] td:eq(2)')
     cell.addClass 'loading'
     cell.text ''
     promise = @variablePromises[variableName]
@@ -157,7 +157,7 @@ class CloudVariablesView extends View
 
   # Toggle watching variable
   toggleWatchVariable: (variableName) ->
-    row = @find('#spark-dev-cloud-variables [data-id=' + variableName + ']')
+    row = @find('#particle-dev-cloud-variables [data-id=' + variableName + ']')
     watchButton = row.find('td:eq(4) button')
     refreshButton = row.find('td:eq(3) button')
     valueCell = row.find('td:eq(2)')
