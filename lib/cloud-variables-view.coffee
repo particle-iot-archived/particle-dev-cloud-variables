@@ -3,10 +3,8 @@
 $ = null
 $$ = null
 whenjs = require 'when'
-SettingsHelper = null
 Subscriber = null
 spark = null
-particleDev = null
 
 module.exports =
 class CloudVariablesView extends View
@@ -14,17 +12,13 @@ class CloudVariablesView extends View
     @div id: 'particle-dev-cloud-variables-container', =>
       @div id: 'particle-dev-cloud-variables', outlet: 'variablesList'
 
-  initialize: (serializeState, mainModule) ->
-    particleDev = mainModule
+  initialize: (serializeState, @main) ->
 
   setup: ->
     {$, $$} = require 'atom-space-pen-views'
 
-    SettingsHelper = particleDev.SettingsHelper
     spark = require 'spark'
-    spark.login { accessToken: SettingsHelper.get('access_token') }
-
-
+    spark.login { accessToken: @main.profileManager.accessToken }
 
     @disposables = new CompositeDisposable
 
@@ -76,7 +70,7 @@ class CloudVariablesView extends View
 
   # Propagate table with variables
   listVariables: ->
-    variables = SettingsHelper.getLocal 'variables'
+    variables = @main.profileManager.getLocal 'variables'
     @variablesList.empty()
 
     if !variables || Object.keys(variables).length == 0
@@ -132,7 +126,7 @@ class CloudVariablesView extends View
     promise = @variablePromises[variableName]
     if !!promise
       promise._handler.resolve()
-    promise = spark.getVariable SettingsHelper.getLocal('current_core'), variableName
+    promise = spark.getVariable @main.profileManager.currentDevice.id, variableName
     @variablePromises[variableName] = promise
     promise.done (e) =>
       if !e
