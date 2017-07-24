@@ -1,3 +1,4 @@
+## 0.1.2 - Install dependencies without using git
 ## 0.1.1 - Update to latest API
 ## 0.1.0 - Rename Spark to Particle
 ## 0.0.6 - Updated Spark.js to 1.0
