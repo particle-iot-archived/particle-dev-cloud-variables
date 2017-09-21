@@ -1,7 +1,7 @@
 {
   "name": "particle-dev-cloud-variables",
   "main": "./lib/cloud-variables",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Cloud variables panel for Particle Dev",
   "repository": "https://github.com/spark/particle-dev-cloud-variables",
   "license": "MIT",
